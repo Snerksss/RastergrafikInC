@@ -1,3 +1,10 @@
+/**
+ * Autor: Simon Berndt
+ * Erstellung einer Rastergrafik
+ *
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,12 +13,11 @@
 #define X_PIXEL 200 // Ihre Bildbreite
 #define Y_PIXEL 200 // Ihre Bildhöhe
 
-
+int ausgabeArray[Y_PIXEL][X_PIXEL][3];
 int blue;
 int green;
 int red;
 
-int ausgabeArray[Y_PIXEL][X_PIXEL][3];
 
 struct dotPosition {
     int x;
@@ -23,6 +29,12 @@ struct xyGroesse {
     int y;
     int maxX;
     int maxY;
+};
+
+struct dotPositionenFuerEinzelnesQuadrat {
+    int xMittelpunkt;
+    int yMittelpunkt;
+    struct dotPosition randPositionen[24];
 };
 
 int create_ppm() {
@@ -43,11 +55,11 @@ void setRedGreenBlueOnCord();
 
 void zeichneGrossesQuadrat();
 
-void zeichneQuadrate();
+struct xyGroesse zeichneQuadrate();
 
 void ungeradeBerechnung();
 
-void connectDots();
+void CalculateConnectDots();
 
 struct xyGroesse berechneMaximaleQuadratGroesse();
 
@@ -61,19 +73,19 @@ int main() {
         }
     int anzahlDots = (((5 * anzahlQuadrate) + (anzahlQuadrate + 1)) * (anzahlQuadrate + 1)) + ((5*anzahlQuadrate)* (anzahlQuadrate +1));
     struct dotPosition connectDots[anzahlDots];
-    struct dotPosition centralDots[anzahlQuadrate * anzahlDots];
+    struct dotPositionenFuerEinzelnesQuadrat quadratDots[anzahlQuadrate * anzahlQuadrate];
     //Farben der Quadrate
     red = 0;
     green = 100;
     blue = 255;
-//    zeichneGrossesQuadrat();
-    zeichneQuadrate(anzahlQuadrate);
+    CalculateConnectDots(zeichneQuadrate(anzahlQuadrate), &connectDots[0], &quadratDots[0]);
     //Farben der Linien
     red = 255;
     green = 0;
     blue = 0;
     create_ppm();
-
+    printf("SUCCESSFUL!!!");
+    return EXIT_SUCCESS;
 }
 
 struct xyGroesse berechneMaximaleQuadratGroesse(int anzahlQuadrate) {
@@ -102,7 +114,7 @@ struct xyGroesse berechneMaximaleQuadratGroesse(int anzahlQuadrate) {
 }
 
 
-void zeichneQuadrate(int anzahlQuadrate) {
+struct xyGroesse zeichneQuadrate(int anzahlQuadrate) {
     struct xyGroesse quadratGroesse = berechneMaximaleQuadratGroesse(anzahlQuadrate);
     for (int i = 0; i < quadratGroesse.maxX; i = i + 1 + quadratGroesse.x) {
         for (int j = 0; j < quadratGroesse.maxY; j++) {
@@ -118,10 +130,10 @@ void zeichneQuadrate(int anzahlQuadrate) {
     red = 255;
     green = 0;
     blue = 0;
-    connectDots(quadratGroesse);
+    return quadratGroesse;
 }
 
-void connectDots(struct xyGroesse quadratgroesse) {
+void CalculateConnectDots(struct xyGroesse quadratgroesse, struct dotPosition allConnectDots[], struct dotPositionenFuerEinzelnesQuadrat singleQuadratDotPositon[]) {
     for (int i = 0; i <= quadratgroesse.maxX; i = i + 1 + quadratgroesse.x) {
         for (int j = 0; j <= quadratgroesse.maxY; j = j + 1 + quadratgroesse.y) {
             setRedGreenBlueOnCord(j, i);
