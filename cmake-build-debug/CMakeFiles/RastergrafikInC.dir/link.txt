@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,--enable-auto-import CMakeFiles/RastergrafikInC.dir/main.c.o -o RastergrafikInC.exe -Wl,--out-implib,libRastergrafikInC.dll.a -Wl,--major-image-version,0,--minor-image-version,0 

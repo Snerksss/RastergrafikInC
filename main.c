@@ -9,11 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #define MYFILENAME "testimage.ppm" // Ihr Filename
-#define X_PIXEL 200 // Ihre Bildbreite
-#define Y_PIXEL 200 // Ihre Bildhöhe
-#define ANZAHLQUADRATE 3 //aendert die Anzahl der Quadrate
+#define X_PIXEL 1000 // Ihre Bildbreite
+#define Y_PIXEL 1000 // Ihre Bildhöhe
+#define ANZAHLQUADRATE  5//aendert die Anzahl der Quadrate
 
 int ausgabeArray[Y_PIXEL][X_PIXEL][3];
 int blue;
@@ -40,7 +41,7 @@ struct xyGroesse {
 struct dotPositionenFuerEinzelnesQuadrat {
     int xMittelpunkt;
     int yMittelpunkt;
-    struct dotPosition randPositionen[24];
+    struct dotPosition randPositionen[ANZAHLQUADRATE*4+4];
 };
 
 struct dotPositionenFuerEinzelnesQuadrat quadratDotPositionen[ANZAHLQUADRATE][ANZAHLQUADRATE];
@@ -58,6 +59,8 @@ int create_ppm() {
         fclose(p_file);
     }
 }
+
+void line();
 
 void setRedGreenBlueOnCord();
 
@@ -88,7 +91,7 @@ int main() {
     blue = 255;
     struct xyGroesse sizeOfXY = zeichneQuadrate(anzahlQuadrate);
     CalculateConnectDots(&sizeOfXY, &quadratDots[0]);
-    CalculateCentralDots(anzahlQuadrate, sizeOfXY, &quadratDots[0]);
+    CalculateCentralDots(anzahlQuadrate, sizeOfXY);
     create_ppm();
     printf("SUCCESSFUL!!!");
     return EXIT_SUCCESS;
@@ -142,8 +145,8 @@ struct xyGroesse zeichneQuadrate(int anzahlQuadrate) {
 int AbstandDots();
 
 void CalculateConnectDots(struct xyGroesse quadratgroesse) {
-    int xAbstandDots = quadratgroesse.x / 6;
-    int moduloXDots = quadratgroesse.x % 6;
+    int xAbstandDots = quadratgroesse.x / (ANZAHLQUADRATE+1);
+    int moduloXDots = quadratgroesse.x % (ANZAHLQUADRATE+1);
     int xZusatz = 0;
     if (moduloXDots > 3) {
         xAbstandDots++;
@@ -152,8 +155,8 @@ void CalculateConnectDots(struct xyGroesse quadratgroesse) {
     }
     quadratgroesse.xAbstandDots = xAbstandDots;
     quadratgroesse.xZusatz = xZusatz;
-    int yAbstandDots = quadratgroesse.y / 6;
-    int moduloYDots = quadratgroesse.x % 6;
+    int yAbstandDots = quadratgroesse.y / (ANZAHLQUADRATE+1);
+    int moduloYDots = quadratgroesse.x % (ANZAHLQUADRATE+1);
     int yZusatz = 0;
     if (moduloYDots > 3) {
         yAbstandDots++;
@@ -186,64 +189,81 @@ void CalculateConnectDots(struct xyGroesse quadratgroesse) {
             struct dotPosition tmp3 = {i, j};
             quadratDotPositionen[quadratCountY][quadratCountX].randPositionen[dotCount] = tmp3;
             dotCount++;
-
-            for (int k = yAbstandDots + yZusatz; k < quadratgroesse.y; k += yAbstandDots) {
+            int count = 0;
+            for (int k = yAbstandDots + yZusatz; count < ANZAHLQUADRATE; k += yAbstandDots) {
                 struct dotPosition tmp4 = {i + k, j};
                 quadratDotPositionen[quadratCountY][quadratCountX].randPositionen[dotCount] = tmp4;
                 setRedGreenBlueOnCord(i + k, j);
+                count++;
                 dotCount++;
             }
-            for (int k = yAbstandDots + yZusatz; k < quadratgroesse.y; k += yAbstandDots) {
+            count = 0;
+            for (int k = yAbstandDots + yZusatz; count < ANZAHLQUADRATE; k += yAbstandDots) {
                 struct dotPosition tmp4 = {i + k, j + quadratgroesse.x + 1};
                 quadratDotPositionen[quadratCountY][quadratCountX].randPositionen[dotCount] = tmp4;
                 setRedGreenBlueOnCord(i + k, j + quadratgroesse.x + 1);
+                count++;
                 dotCount++;
             }
-
-            for (int k = xAbstandDots + xZusatz; k < quadratgroesse.x; k += xAbstandDots) {
+            count = 0;
+            for (int k = xAbstandDots + xZusatz; count < ANZAHLQUADRATE; k += xAbstandDots) {
                 struct dotPosition tmp4 = {i, j + k};
                 quadratDotPositionen[quadratCountY][quadratCountX].randPositionen[dotCount] = tmp4;
                 setRedGreenBlueOnCord(i, j + k);
+                count++;
                 dotCount++;
             }
-            for (int k = xAbstandDots + xZusatz; k < quadratgroesse.x; k += xAbstandDots) {
+            count = 0;
+            for (int k = xAbstandDots + xZusatz; count < ANZAHLQUADRATE; k += xAbstandDots) {
                 struct dotPosition tmp4 = {i + quadratgroesse.y + 1, j + k};
                 quadratDotPositionen[quadratCountY][quadratCountX].randPositionen[dotCount] = tmp4;
                 setRedGreenBlueOnCord(i + quadratgroesse.y + 1, j + k);
+                count++;
                 dotCount++;
             }
             dotCount = 0;
             quadratCountX++;
         }
+        quadratCountX = 0;
         quadratCountY++;
     }
 }
 
-void ungeradeBerechnung(int anzahlQuadrate, struct xyGroesse sizeOfXY,
-                        struct dotPositionenFuerEinzelnesQuadrat dotPositionen[]) {
-
-
-    for (int i = 0; i < anzahlQuadrate * anzahlQuadrate; i++) {
-        for (int j = 0; j < anzahlQuadrate; j++) {
-            struct dotPositionenFuerEinzelnesQuadrat singleQuadrat = dotPositionen[i];
-            struct dotPosition singleQuadrateMidPoint = {singleQuadrat.randPositionen[6].y,
-                                                         singleQuadrat.randPositionen[16].x};
-            setRedGreenBlueOnCord(singleQuadrateMidPoint.y, singleQuadrateMidPoint.x);
+void CalculateCentralDots(int anzahlQuadrate, struct xyGroesse sizeOfXY) {
+    srand(time(NULL));
+    for(int i = 0; i < anzahlQuadrate; i++){
+        for(int j = 0; j < anzahlQuadrate; j++){
+            quadratDotPositionen[i][j].yMittelpunkt = quadratDotPositionen[i][j].randPositionen[3+i+1].y;
+            quadratDotPositionen[i][j].xMittelpunkt = quadratDotPositionen[i][j].randPositionen[3+(anzahlQuadrate*2)+j+1].x;
+            setRedGreenBlueOnCord(quadratDotPositionen[i][j].yMittelpunkt, quadratDotPositionen[i][j].xMittelpunkt);
+            for(int k = 0; k < (ANZAHLQUADRATE*4+4); k++){
+                //red = rand()%255;
+                //green = rand()%255;
+               // blue = rand()%255;
+                line(quadratDotPositionen[i][j].xMittelpunkt, quadratDotPositionen[i][j].yMittelpunkt, quadratDotPositionen[i][j].randPositionen[k].x, quadratDotPositionen[i][j].randPositionen[k].y);
+            }
         }
     }
-}
 
-void CalculateCentralDots(int anzahlQuadrate, struct xyGroesse sizeOfXY,
-                          struct dotPositionenFuerEinzelnesQuadrat dotPositionen[]) {
-    if (anzahlQuadrate % 2 != 0) {
-        //ungeradeBerechnung(anzahlQuadrate, sizeOfXY, &dotPositionen[0]);
-    } else {
-
-    }
 }
 
 void setRedGreenBlueOnCord(int y, int x) {
     ausgabeArray[y][x][0] = red;
     ausgabeArray[y][x][1] = green;
     ausgabeArray[y][x][2] = blue;
+}
+
+void line(int x0, int y0, int x1, int y1)
+{
+    int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
+    int dy = -abs(y1-y0), sy = y0<y1 ? 1 : -1;
+    int err = dx+dy, e2; /* error value e_xy */
+
+    while (1) {
+        setRedGreenBlueOnCord(y0,x0);
+        if (x0==x1 && y0==y1) break;
+        e2 = 2*err;
+        if (e2 > dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+        if (e2 < dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+    }
 }
