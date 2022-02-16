@@ -5,7 +5,7 @@
  *
  */
 
-
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -94,6 +94,7 @@ int main() {
     endPrint = clock();
     printf("SUCCESSFUL!!!");
     printf("\nDie Berechnung dauerte %d Sekunden, die Erstellung der Datei dauerte %d Sekunden", (endCalculateBeginPrint-beginCalculate)/(CLOCKS_PER_SEC), (endPrint-endCalculateBeginPrint)/(CLOCKS_PER_SEC));
+    sleep(3);
     return EXIT_SUCCESS;
 }
 
