@@ -8,12 +8,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <time.h>
 
-#define MYFILENAME "testimage.ppm" // Ihr Filename
-#define X_PIXEL 1000 // Ihre Bildbreite
-#define Y_PIXEL 1000 // Ihre Bildhöhe
+#define MYFILENAME "ausgabe.ppm" // Ihr Filename
+#define X_PIXEL 500 // Ihre Bildbreite
+#define Y_PIXEL 500 // Ihre Bildhöhe
 #define ANZAHLQUADRATE  5//aendert die Anzahl der Quadrate
 
 int ausgabeArray[Y_PIXEL][X_PIXEL][3];
@@ -32,10 +31,6 @@ struct xyGroesse {
     int y;
     int maxX;
     int maxY;
-    int xAbstandDots;
-    int yAbstandDots;
-    int xZusatz;
-    int yZusatz;
 };
 
 struct dotPositionenFuerEinzelnesQuadrat {
@@ -64,8 +59,6 @@ void line();
 
 void setRedGreenBlueOnCord();
 
-void zeichneGrossesQuadrat();
-
 struct xyGroesse zeichneQuadrate();
 
 void CalculateCentralDots();
@@ -75,6 +68,8 @@ void CalculateConnectDots();
 struct xyGroesse berechneMaximaleQuadratGroesse();
 
 int main() {
+    clock_t beginCalculate, endCalculateBeginPrint, endPrint;
+    beginCalculate = clock();
     int anzahlQuadrate = ANZAHLQUADRATE;
     for (int i = 0; i < X_PIXEL; i++)
         for (int j = 0; j < Y_PIXEL; j++) {
@@ -82,18 +77,23 @@ int main() {
                 ausgabeArray[j][i][k] = 255;
             }
         }
-    int anzahlDots = (((5 * anzahlQuadrate) + (anzahlQuadrate + 1)) * (anzahlQuadrate + 1)) +
-                     ((5 * anzahlQuadrate) * (anzahlQuadrate + 1));
     struct dotPositionenFuerEinzelnesQuadrat quadratDots[anzahlQuadrate * anzahlQuadrate];
     //Farben der Quadrate
     red = 0;
     green = 100;
     blue = 255;
     struct xyGroesse sizeOfXY = zeichneQuadrate(anzahlQuadrate);
+    //Farbe der Linien
+    red = 255;
+    green = 0;
+    blue = 0;
     CalculateConnectDots(&sizeOfXY, &quadratDots[0]);
-    CalculateCentralDots(anzahlQuadrate, sizeOfXY);
+    CalculateCentralDots(anzahlQuadrate);
+    endCalculateBeginPrint = clock();
     create_ppm();
+    endPrint = clock();
     printf("SUCCESSFUL!!!");
+    printf("\nDie Berechnung dauerte %d Sekunden, die Erstellung der Datei dauerte %d Sekunden", (endCalculateBeginPrint-beginCalculate)/(CLOCKS_PER_SEC), (endPrint-endCalculateBeginPrint)/(CLOCKS_PER_SEC));
     return EXIT_SUCCESS;
 }
 
@@ -135,14 +135,8 @@ struct xyGroesse zeichneQuadrate(int anzahlQuadrate) {
             setRedGreenBlueOnCord(j, i);
         }
     }
-
-    red = 255;
-    green = 0;
-    blue = 0;
     return quadratGroesse;
 }
-
-int AbstandDots();
 
 void CalculateConnectDots(struct xyGroesse quadratgroesse) {
     int xAbstandDots = quadratgroesse.x / (ANZAHLQUADRATE+1);
@@ -153,8 +147,6 @@ void CalculateConnectDots(struct xyGroesse quadratgroesse) {
     } else {
         xZusatz++;
     }
-    quadratgroesse.xAbstandDots = xAbstandDots;
-    quadratgroesse.xZusatz = xZusatz;
     int yAbstandDots = quadratgroesse.y / (ANZAHLQUADRATE+1);
     int moduloYDots = quadratgroesse.x % (ANZAHLQUADRATE+1);
     int yZusatz = 0;
@@ -163,8 +155,6 @@ void CalculateConnectDots(struct xyGroesse quadratgroesse) {
     } else {
         yZusatz++;
     }
-    quadratgroesse.yAbstandDots = yAbstandDots;
-    quadratgroesse.yZusatz = yZusatz;
     int quadratCountX = 0;
     int quadratCountY = 0;
     int dotCount = 0;
@@ -229,17 +219,13 @@ void CalculateConnectDots(struct xyGroesse quadratgroesse) {
     }
 }
 
-void CalculateCentralDots(int anzahlQuadrate, struct xyGroesse sizeOfXY) {
-    srand(time(NULL));
+void CalculateCentralDots(int anzahlQuadrate) {
     for(int i = 0; i < anzahlQuadrate; i++){
         for(int j = 0; j < anzahlQuadrate; j++){
             quadratDotPositionen[i][j].yMittelpunkt = quadratDotPositionen[i][j].randPositionen[3+i+1].y;
             quadratDotPositionen[i][j].xMittelpunkt = quadratDotPositionen[i][j].randPositionen[3+(anzahlQuadrate*2)+j+1].x;
             setRedGreenBlueOnCord(quadratDotPositionen[i][j].yMittelpunkt, quadratDotPositionen[i][j].xMittelpunkt);
-            for(int k = 0; k < (ANZAHLQUADRATE*4+4); k++){
-                //red = rand()%255;
-                //green = rand()%255;
-               // blue = rand()%255;
+            for(int k = 0; k < (anzahlQuadrate*4+4); k++){
                 line(quadratDotPositionen[i][j].xMittelpunkt, quadratDotPositionen[i][j].yMittelpunkt, quadratDotPositionen[i][j].randPositionen[k].x, quadratDotPositionen[i][j].randPositionen[k].y);
             }
         }
