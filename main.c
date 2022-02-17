@@ -1,5 +1,5 @@
 /**
- * Autor: Simon Berndt
+ * Autor: Simon Berndt - DHBW Heidenheim
  * Last Change: 11.02.2022
  * Erstellung einer Rastergrafik nach gegebener Vorlage
  *
@@ -11,9 +11,9 @@
 #include <time.h>
 
 #define MYFILENAME "ausgabe.ppm" // Ihr Filename
-#define X_PIXEL 500 // Ihre Bildbreite
-#define Y_PIXEL 500 // Ihre Bildhöhe
-#define ANZAHLQUADRATE  5//aendert die Anzahl der Quadrate
+#define X_PIXEL 2000 // Ihre Bildbreite
+#define Y_PIXEL 2000 // Ihre Bildhöhe
+#define ANZAHLQUADRATE  6//aendert die Anzahl der Quadrate
 
 int ausgabeArray[Y_PIXEL][X_PIXEL][3];
 int blue;
@@ -52,7 +52,9 @@ int create_ppm() {
             fprintf(p_file, "\n");
         }
         fclose(p_file);
+        return 1;
     }
+    return 0;
 }
 
 void line();
@@ -90,9 +92,12 @@ int main() {
     CalculateConnectDots(&sizeOfXY, &quadratDots[0]);
     CalculateCentralDots(anzahlQuadrate);
     endCalculateBeginPrint = clock();
-    create_ppm();
+    if(create_ppm() == 1){
+        printf("SUCCESSFUL!!!");
+    } else {
+        printf("print Failed!!!");
+    }
     endPrint = clock();
-    printf("SUCCESSFUL!!!");
     printf("\nDie Berechnung dauerte %d Sekunden, die Erstellung der Datei dauerte %d Sekunden", (endCalculateBeginPrint-beginCalculate)/(CLOCKS_PER_SEC), (endPrint-endCalculateBeginPrint)/(CLOCKS_PER_SEC));
     sleep(3);
     return EXIT_SUCCESS;
