@@ -11,15 +11,14 @@
 #include <time.h>
 
 #define MYFILENAME "ausgabe.ppm" // Ihr Filename
-#define X_PIXEL 2000 // Ihre Bildbreite
-#define Y_PIXEL 2000 // Ihre Bildhöhe
-#define ANZAHLQUADRATE  6//aendert die Anzahl der Quadrate
+#define X_PIXEL 1000 // Ihre Bildbreite
+#define Y_PIXEL 1000 // Ihre Bildhöhe
+#define ANZAHLQUADRATE  5//aendert die Anzahl der Quadrate
 
 int ausgabeArray[Y_PIXEL][X_PIXEL][3];
 int blue;
 int green;
 int red;
-
 
 struct dotPosition {
     int y;
@@ -70,27 +69,27 @@ void CalculateConnectDots();
 struct xyGroesse berechneMaximaleQuadratGroesse();
 
 int main() {
+    printf("Aenderung der Variablen entsteht durch #define, standard ist 1000x1000px und 5 Quadrate\n\n\n");
     clock_t beginCalculate, endCalculateBeginPrint, endPrint;
     beginCalculate = clock();
-    int anzahlQuadrate = ANZAHLQUADRATE;
     for (int i = 0; i < X_PIXEL; i++)
         for (int j = 0; j < Y_PIXEL; j++) {
             for (int k = 0; k < 3; k++) {
-                ausgabeArray[j][i][k] = 255;
+                ausgabeArray[j][i][k] = 0; //Farbe des Hintergrundes
             }
         }
-    struct dotPositionenFuerEinzelnesQuadrat quadratDots[anzahlQuadrate * anzahlQuadrate];
+    struct dotPositionenFuerEinzelnesQuadrat quadratDots[ANZAHLQUADRATE * ANZAHLQUADRATE];
     //Farben der Quadrate
     red = 0;
     green = 100;
     blue = 255;
-    struct xyGroesse sizeOfXY = zeichneQuadrate(anzahlQuadrate);
+    struct xyGroesse sizeOfXY = zeichneQuadrate(ANZAHLQUADRATE);
     //Farbe der Linien
     red = 255;
-    green = 0;
-    blue = 0;
+    green = 255;
+    blue = 255;
     CalculateConnectDots(&sizeOfXY, &quadratDots[0]);
-    CalculateCentralDots(anzahlQuadrate);
+    CalculateCentralDots(ANZAHLQUADRATE);
     endCalculateBeginPrint = clock();
     if(create_ppm() == 1){
         printf("SUCCESSFUL!!!");
