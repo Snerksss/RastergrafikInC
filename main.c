@@ -12,6 +12,12 @@
 
 #define MYFILENAME "ausgabe.ppm" // Ihr Filename
 
+struct color {
+    int r;
+    int g;
+    int b;
+};
+
 struct dotPosition {
     int y;
     int x;
@@ -36,23 +42,29 @@ void calculateConnectDots();
 
 void line();
 
-int create_ppm(int xPixel, int yPixel, int ausgabeArray[], int rB, int gB, int bB, int rF, int gF, int bF, int rQ, int gQ, int bQ) {
+int create_ppm(int xPixel, int yPixel, const int ausgabeArray[], struct color background, struct color foreground,
+               struct color quadrat) {
     FILE *p_file = fopen(MYFILENAME, "w");
     if (NULL != p_file) {
         fprintf(p_file, "P3\n %d %d\n 255\n", xPixel, yPixel);
         for (int i = 0; i < yPixel; i++) {
             for (int j = 0; j < xPixel; j++) {
-                if(ausgabeArray[i * xPixel + j] == 0) {
-                    fprintf(p_file, "%d %d %d ", rB, gB, bB);
+                if (ausgabeArray[i * xPixel + j] == 0) {
+                    fprintf(p_file, "%d %d %d ", background.r, background.g, background.b);
                 } else {
-                    if(ausgabeArray[i * xPixel + j] == 1) {
-                        fprintf(p_file, "%d %d %d ", rF, gF, bF);
+                    if (ausgabeArray[i * xPixel + j] == 1) {
+                        fprintf(p_file, "%d %d %d ", foreground.r, foreground.g, foreground.b);
                     } else {
-                        fprintf(p_file, "%d %d %d ", rQ, gQ, bQ);
+                        fprintf(p_file, "%d %d %d ", quadrat.r, quadrat.g, quadrat.b);
                     }
+
                 }
             }
             fprintf(p_file, "\n");
+            if (yPixel > 3000 && i > 500 && i % 1000 == 0) {
+                printf("\n");
+                printf("Es wurden %d/%d Zeilen erstellt\n", i, yPixel);
+            }
         }
         fclose(p_file);
         return 0;
@@ -61,36 +73,99 @@ int create_ppm(int xPixel, int yPixel, int ausgabeArray[], int rB, int gB, int b
 }
 
 int main() {
-    int xPixel = 20000;
-    int yPixel = 20000;
+    setbuf(stdout, 0);
+    int xPixel = 2000;
+    int yPixel = 1000;
     int anzahlQuadrate = 5;
 
     //Background Color
-    int rB = 0;
-    int gB = 0;
-    int bB = 0;
+    struct color background;
 
     //Front Color
-    int rF = 255;
-    int gF = 255;
-    int bF = 255;
+    struct color forground;
 
     //Quadrat Color
-    int rQ = 255;
-    int gQ = 255;
-    int bQ = 255;
+    struct color quadrat;
 
-    int *ausgabeArray = malloc(xPixel*yPixel*sizeof(int));
+    char yesNo;
+    do {
+        printf("Soll der Ausgabebereich quadratisch sein Y/N\n");
+    } while (0 == scanf("%s", &yesNo));
 
-    //long ausgabeArray[xPixel * yPixel];
-    for (int i = 0; i < xPixel; i++) {
-        for (int j = 0; j < yPixel; j++) {
-            setPixel(i, j, ausgabeArray, yPixel, 0);
+    if (yesNo == 'Y' || yesNo == 'y') {
+        int pixel;
+        do {
+            char ch = getchar();
+            printf("\n");
+            printf("Wie gross soll der Anzeigebereich sein\n");
+            printf("Einfach als Zahl in Pixelgroesse angeben. Bsp.: 1000\n");
+        } while (0 == scanf("%d", &pixel));
+        xPixel = pixel;
+        yPixel = pixel;
+    } else {
+        do {
+            char ch = getchar();
+            printf("\n");
+            printf("Wie gross soll der Anzeigebereich sein\n");
+            printf("Erste Zahl wird der X Wert, zweite Zahl der Y Wert\n");
+            printf("Einfach als Zahl in Pixelgroesse angeben. Bsp.: 2000 1000\n");
+        } while (0 == scanf("%d %d", &xPixel, &yPixel));
+    }
+
+    do {
+        char ch = getchar();
+        printf("\n");
+        printf("Moechtest du die Farben vom Hintergrund, von den Linien und den Quadraten selbst bestimmen\n");
+        printf("Bei Y kannst du die RGB Werte selbst bestimmen, bei N ist der Hintergrund schwarz und der Vordergrund Weiss\n");
+        printf("Y/N\n");
+    } while (0 == scanf("%s", &yesNo));
+
+    if (yesNo == 'Y' || yesNo == 'y') {
+        do {
+            char ch = getchar();
+            printf("\n");
+            printf("Geben sie den RGB Wert fuer den Hintergrund an. Bsp. 0 0 0\n");
+        } while (0 == scanf("%d %d %d", &background.r, &background.g, &background.b));
+        do {
+            char ch = getchar();
+            printf("\n");
+            printf("Geben sie den RGB Wert fuer den Vordergrund an. Bsp. 255 255 255\n");
+        } while (0 == scanf("%d %d %d", &forground.r, &forground.g, &forground.b));
+        do {
+            char ch = getchar();
+            printf("\n");
+            printf("Geben sie den RGB Wert fuer die Quadrate an. Bsp. 0 255 0\n");
+        } while (0 == scanf("%d %d %d", &quadrat.r, &quadrat.g, &quadrat.b));
+    } else {
+        forground.r = 255;
+        forground.g = 255;
+        forground.b = 255;
+        background.r = 0;
+        background.g = 0;
+        background.b = 0;
+        quadrat.r = 255;
+        quadrat.g = 255;
+        quadrat.b = 255;
+    }
+
+    clock_t start = clock();
+    int *ausgabeArray = malloc(xPixel * yPixel * sizeof(int));
+
+    for (int i = 0; i < yPixel; i++) {
+        for (int j = 0; j < xPixel; j++) {
+            setPixel(i, j, ausgabeArray, xPixel, 0);
         }
     }
     struct xyGroesse quadratGroesse = zeichneQuadrate(anzahlQuadrate, ausgabeArray, xPixel, yPixel);
-    calculateConnectDots(quadratGroesse, ausgabeArray, yPixel, anzahlQuadrate);
-    return create_ppm(xPixel, yPixel, ausgabeArray, rB, gB, bB, rF, gF, bF, rQ, gQ, bQ);
+    calculateConnectDots(quadratGroesse, ausgabeArray, yPixel, xPixel, anzahlQuadrate);
+    clock_t berechnung = clock();
+    int zeitBerechnung = (int) (berechnung - start) / CLOCKS_PER_SEC;
+    create_ppm(xPixel, yPixel, ausgabeArray, background, forground, quadrat);
+    clock_t end = clock();
+    int endZeit = (int) (end - berechnung) / CLOCKS_PER_SEC;
+    printf("\nDie Berechnung dauerte %d Sekunden", zeitBerechnung);
+    printf("\nDie Erstellung der Datei dauerte %d Sekunden", endZeit);
+    return 0;
 }
 
 struct xyGroesse berechneMaximaleQuadratGroesse(int anzahlQuadrate, int xPixel, int yPixel) {
@@ -119,23 +194,23 @@ struct xyGroesse berechneMaximaleQuadratGroesse(int anzahlQuadrate, int xPixel, 
 }
 
 
-struct xyGroesse zeichneQuadrate(int anzahlQuadrate, long ausgabeArray[], int xPixel, int yPixel) {
+struct xyGroesse zeichneQuadrate(int anzahlQuadrate, int ausgabeArray[], int xPixel, int yPixel) {
     struct xyGroesse quadratGroesse = berechneMaximaleQuadratGroesse(anzahlQuadrate, xPixel, yPixel);
     for (int i = 0; i < quadratGroesse.maxX; i = i + 1 + quadratGroesse.x) {
         for (int j = 0; j < quadratGroesse.maxY; j++) {
-            setPixel(j, i, ausgabeArray, yPixel, 2);
+            setPixel(j, i, ausgabeArray, xPixel, 2);
         }
     }
     for (int j = 0; j < quadratGroesse.maxY; j = j + 1 + quadratGroesse.y) {
         for (int i = 0; i < quadratGroesse.maxX; i++) {
-            setPixel(j, i, ausgabeArray, yPixel, 2);
+            setPixel(j, i, ausgabeArray, xPixel, 2);
         }
     }
     return quadratGroesse;
 }
 
 void
-calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int yPixel, int anzahlQuadrate) {
+calculateConnectDots(struct xyGroesse quadratgroesse, int ausgabeArray[], int yPixel, int xPixel, int anzahlQuadrate) {
     int xAbstandDots = quadratgroesse.x / (anzahlQuadrate + 1);
     int moduloXDots = quadratgroesse.x % (anzahlQuadrate + 1);
     int xZusatz = 0;
@@ -178,7 +253,6 @@ calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int y
             for (int k = yAbstandDots + yZusatz; count < anzahlQuadrate; k += yAbstandDots) {
                 struct dotPosition tmp4 = {i + k, j};
                 dotArray[dotCount] = tmp4;
-                setPixel(tmp4.y, tmp4.x, ausgabeArray, yPixel, 1);
                 count++;
                 dotCount++;
             }
@@ -187,7 +261,6 @@ calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int y
             for (int k = yAbstandDots + yZusatz; count < anzahlQuadrate; k += yAbstandDots) {
                 struct dotPosition tmp4 = {i + k, j + quadratgroesse.x + 1};
                 dotArray[dotCount] = tmp4;
-                setPixel(tmp4.y, tmp4.x, ausgabeArray, yPixel, 1);
                 count++;
                 dotCount++;
             }
@@ -196,7 +269,6 @@ calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int y
             for (int k = xAbstandDots + xZusatz; count < anzahlQuadrate; k += xAbstandDots) {
                 struct dotPosition tmp4 = {i, j + k};
                 dotArray[dotCount] = tmp4;
-                setPixel(tmp4.y, tmp4.x, ausgabeArray, yPixel, 1);
                 count++;
                 dotCount++;
             }
@@ -205,7 +277,6 @@ calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int y
             for (int k = xAbstandDots + xZusatz; count < anzahlQuadrate; k += xAbstandDots) {
                 struct dotPosition tmp4 = {i + quadratgroesse.y + 1, j + k};
                 dotArray[dotCount] = tmp4;
-                setPixel(tmp4.y, tmp4.x, ausgabeArray, yPixel, 1);
                 count++;
                 dotCount++;
             }
@@ -213,7 +284,7 @@ calculateConnectDots(struct xyGroesse quadratgroesse, long ausgabeArray[], int y
                                                                   quadratCountX);
 
             for (int l = 0; l < (anzahlQuadrate * 4 + 4); l++) {
-                line(mittelpunkt.x, mittelpunkt.y, dotArray[l].x, dotArray[l].y, ausgabeArray, yPixel);
+                line(mittelpunkt.x, mittelpunkt.y, dotArray[l].x, dotArray[l].y, ausgabeArray, yPixel, xPixel);
             }
             quadratCountX++;
         }
@@ -229,17 +300,17 @@ calculateCentralDots(int anzahlQuadrate, struct dotPosition quadratDots[], int y
     return mittelpunkt;
 }
 
-void setPixel(int y, int x, long ausgabeArray[], int yPixel, int value) {
-    ausgabeArray[x * yPixel + y] = value;
+void setPixel(int y, int x, int ausgabeArray[], int xPixel, int value) {
+    ausgabeArray[y * xPixel + x] = value;
 }
 
-void line(int x0, int y0, int x1, int y1, long ausgabeArray[], int yPixel) {
+void line(int x0, int y0, int x1, int y1, int ausgabeArray[], int yPixel, int xPixel) {
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
     int err = dx + dy, e2; /* error value e_xy */
 
     while (1) {
-        setPixel(y0, x0, ausgabeArray, yPixel, 1);
+        setPixel(y0, x0, ausgabeArray, xPixel, 1);
         if (x0 == x1 && y0 == y1) break;
         e2 = 2 * err;
         if (e2 > dy) {
