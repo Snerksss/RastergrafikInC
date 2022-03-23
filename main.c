@@ -125,16 +125,19 @@ int main() {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer den Hintergrund an. Bsp. 0 0 0\n");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
         } while (0 == scanf("%d %d %d", &background.r, &background.g, &background.b));
         do {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer den Vordergrund an. Bsp. 255 255 255\n");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
         } while (0 == scanf("%d %d %d", &forground.r, &forground.g, &forground.b));
         do {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer die Quadrate an. Bsp. 0 255 0\n");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
         } while (0 == scanf("%d %d %d", &quadrat.r, &quadrat.g, &quadrat.b));
     } else {
         forground.r = 255;
