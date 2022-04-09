@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include "draw.h"
+
 #define MYFILENAME "ausgabe.ppm" // Ihr Filename
 
 
@@ -28,17 +30,26 @@ int main() {
     int anzahlQuadrate = 5;
 
     //Background Color
-    struct color background;
+    struct color background = {0, 0, 0};
 
     //Front Color
-    struct color forground;
+    struct color forground = {255, 255, 255};
 
     //Quadrat Color
-    struct color quadrat;
+    struct color quadrat = {255, 255, 255};
+
+    do {
+        printf("\nwie viele Quadrate moechten sieh in einer Zeile und Spalte haben\n");
+        printf("Bitte denken sie daran, desto groesser die Anzahl der Quadrate wird, desto groesser sollten sie später den Ausgabebereich waehlen.\n");
+        printf("Bitte geben sie eine Zahl ein; Bsp: 5\n");
+    } while(0 == scanf("%d", &anzahlQuadrate));
 
     char yesNo;
     do {
-        printf("Soll der Ausgabebereich quadratisch sein Y/N\n");
+        char ch = getchar();
+        printf("\n");
+        printf("Soll der Ausgabebereich quadratisch sein\n");
+        printf("Y oder y wird JA, jede andere Eingabe wird als NEIN interpretiert!\n");
     } while (0 == scanf("%s", &yesNo));
 
     if (yesNo == 'Y' || yesNo == 'y') {
@@ -47,7 +58,9 @@ int main() {
             char ch = getchar();
             printf("\n");
             printf("Wie gross soll der Anzeigebereich sein\n");
+            printf("Die hoechstmoegliche Zahl ist Computer abhaengig, normalerweise sollte bis 10000px kein Problem sein.\n");
             printf("Einfach als Zahl in Pixelgroesse angeben. Bsp.: 1000\n");
+            printf("bitte mindestens 100 Pixel, eher mehr, da das sonst erzeugte Bild keinen sinn ergibt\n");
         } while (0 == scanf("%d", &pixel));
         xPixel = pixel;
         yPixel = pixel;
@@ -58,35 +71,36 @@ int main() {
             printf("Wie gross soll der Anzeigebereich sein\n");
             printf("Erste Zahl wird der X Wert, zweite Zahl der Y Wert\n");
             printf("Einfach als Zahl in Pixelgroesse angeben. Bsp.: 2000 1000\n");
+            printf("bitte mindestens 100 Pixel, eher mehr, da das sonst erzeugte Bild keinen sinn ergibt\n");
         } while (0 == scanf("%d %d", &xPixel, &yPixel));
     }
 
     do {
         char ch = getchar();
         printf("\n");
-        printf("Moechtest du die Farben vom Hintergrund, von den Linien und den Quadraten selbst bestimmen\n");
-        printf("Bei Y kannst du die RGB Werte selbst bestimmen, bei N ist der Hintergrund schwarz und der Vordergrund Weiss\n");
-        printf("Y/N\n");
+        printf("Moechtest du als Hintergrundfarben die Standard Werte verwenden (Hintergrund: schwarz, Vordergrund: weiss) --> Y/y\n");
+        printf("jede andere Eingabe wird als NEIN interpretiert!\n");
+        printf("wenn du selbst entscheiden moechtest, kannst du die Farben fuer den Hintergrund, fuer die Linien der Quadrate und fuer die Linien in den Quadraten selbst bestimmen\n");
     } while (0 == scanf("%s", &yesNo));
 
-    if (yesNo == 'Y' || yesNo == 'y') {
+    if (yesNo != 'Y' && yesNo != 'y') {
         do {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer den Hintergrund an. Bsp. 0 0 0\n");
-            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt\n");
         } while (0 == scanf("%d %d %d", &background.r, &background.g, &background.b));
         do {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer den Vordergrund an. Bsp. 255 255 255\n");
-            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt\n");
         } while (0 == scanf("%d %d %d", &forground.r, &forground.g, &forground.b));
         do {
             char ch = getchar();
             printf("\n");
             printf("Geben sie den RGB Wert fuer die Quadrate an. Bsp. 0 255 0\n");
-            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt");
+            printf("\n min: 0, max: 255; 3 Zahlen jeweils mit Leerzeichen getrennt\n");
         } while (0 == scanf("%d %d %d", &quadrat.r, &quadrat.g, &quadrat.b));
     } else {
         forground.r = 255;
@@ -100,6 +114,8 @@ int main() {
         quadrat.b = 255;
     }
 
+    printf("\nBerechnung der Datei gestartet!!!\n");
+
     clock_t start = clock();
     int *ausgabeArray = malloc(xPixel * yPixel * sizeof(int));
 
@@ -112,11 +128,16 @@ int main() {
     calculateConnectDots(quadratGroesse, ausgabeArray, yPixel, xPixel, anzahlQuadrate);
     clock_t berechnung = clock();
     int zeitBerechnung = (int) (berechnung - start) / CLOCKS_PER_SEC;
+
+    printf("\nDie Berechnung dauerte %d Sekunden", zeitBerechnung);
+    printf("\nErstellung der .ppm Datei gestartet, bei grosser Pixel Zahl kann dies lange dauern.\n");
     create_ppm(xPixel, yPixel, ausgabeArray, background, forground, quadrat);
     clock_t end = clock();
     int endZeit = (int) (end - berechnung) / CLOCKS_PER_SEC;
-    printf("\nDie Berechnung dauerte %d Sekunden", zeitBerechnung);
+
     printf("\nDie Erstellung der Datei dauerte %d Sekunden", endZeit);
+    printf("\n\n PROGRAM SLEEPS 5 SECONDS UNTIL IT STOPS.");
+    sleep(5);
     return 0;
 }
 

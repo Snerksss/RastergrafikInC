@@ -1,9 +1,10 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/RastergrafikInC.dir/draw.c.o"
-  "CMakeFiles/RastergrafikInC.dir/draw.c.o.d"
-  "CMakeFiles/RastergrafikInC.dir/main.c.o"
-  "CMakeFiles/RastergrafikInC.dir/main.c.o.d"
+  "CMakeFiles/RastergrafikInC.dir/draw.c.obj"
+  "CMakeFiles/RastergrafikInC.dir/draw.c.obj.d"
+  "CMakeFiles/RastergrafikInC.dir/main.c.obj"
+  "CMakeFiles/RastergrafikInC.dir/main.c.obj.d"
   "RastergrafikInC.exe"
+  "RastergrafikInC.exe.manifest"
   "RastergrafikInC.pdb"
   "libRastergrafikInC.dll.a"
 )
