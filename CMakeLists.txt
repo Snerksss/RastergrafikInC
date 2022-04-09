@@ -3,4 +3,4 @@ project(RastergrafikInC C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(RastergrafikInC main.c)
+add_executable(RastergrafikInC main.c draw.c)

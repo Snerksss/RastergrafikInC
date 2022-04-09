@@ -8,7 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "C:/Users/simon/CLionProjects/RastergrafikInC/main.c" "CMakeFiles/RastergrafikInC.dir/main.c.obj" "gcc" "CMakeFiles/RastergrafikInC.dir/main.c.obj.d"
+  "/cygdrive/c/Users/simon/CLionProjects/RastergrafikInC/draw.c" "CMakeFiles/RastergrafikInC.dir/draw.c.o" "gcc" "CMakeFiles/RastergrafikInC.dir/draw.c.o.d"
+  "/cygdrive/c/Users/simon/CLionProjects/RastergrafikInC/main.c" "CMakeFiles/RastergrafikInC.dir/main.c.o" "gcc" "CMakeFiles/RastergrafikInC.dir/main.c.o.d"
   )
 
 # Targets to which this target links.
